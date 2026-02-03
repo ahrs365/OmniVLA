@@ -62,7 +62,7 @@ def init_module(
     module_class: Type[nn.Module],
     module_name: str,
     cfg: "InferenceConfig",
-    device_id: int,
+    device_id,
     module_args: dict,
     to_bf16: bool = False,
 ) -> DDP:
@@ -499,8 +499,9 @@ def define_model(cfg: InferenceConfig) -> None:
 
     # GPU setup
     device_id = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.cuda.set_device(device_id)
-    torch.cuda.empty_cache()
+    if device_id.type == "cuda":
+        torch.cuda.set_device(device_id.index or 0)
+        torch.cuda.empty_cache()
 
     print(
         "Detected constants:\n"
